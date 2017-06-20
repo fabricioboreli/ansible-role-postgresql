@@ -1,0 +1,9 @@
+---
+# Variaveis
+postgresql_server_pg_hba_file: path_to_pg_hba.conf
+
+# Adiciona usuarios e banco
+# users:
+#   - username: joe
+#     password: joeLongPassword
+#     database: joe

@@ -1,0 +1,14 @@
+galaxy_info:
+  author: Fabricio Boreli Ferreira
+  description: System and Network Administrator
+  company: Company
+  license: MIT
+  min_ansible_version: 2.2
+  platforms:
+  - name: CentOS
+    versions:
+    - 7
+  
+  galaxy_tags: []
+  
+dependencies: []
