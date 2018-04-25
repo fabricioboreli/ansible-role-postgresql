@@ -1,0 +1,31 @@
+---
+- name: PostgreSQL | Add users
+  postgresql_user:
+    name: "{{ item.username }}"
+    password: "{{ item.password }}"
+    state: present
+  become: yes
+  become_user: postgres
+  with_items: "{{ users }}"
+  
+- name: PostgreSQL | Create databases
+  postgresql_db:
+    name: "{{ item.username }}"
+    owner: "{{ item.username }}"
+    state: present
+  become: yes
+  become_user: postgres
+  with_items: "{{ users }}"
+  
+- name: PostgreSQL | Define user privileges
+  postgresql_privs:
+    database: "{{ item.database }}"
+    password: "{{ item.password }}"
+    role: "{{ item.username }}"
+    privs: ALL
+    type: database
+    grant_option: yes
+    state: present
+  become: yes
+  become_user: postgres
+  with_items: "{{ users }}"

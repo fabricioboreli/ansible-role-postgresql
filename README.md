@@ -8,13 +8,14 @@ Os hosts com permissão de acesso devem ser incluidos no arquivo pg_hba.conf.
 
 Requisitos
 ----------
-CentOS 7
+CentOS 7  
+Debian 9  
 
 Variaveis do Role
 -----------------
 Na variavel _postgresql_server_pg_hba_file_ deve ser informado o caminho onde se encontra o arquivo pg_hba.conf.
 ```yaml
-postgresql_server_pg_hba_file: ../templates/postgresql/pg_hba.conf
+postgresql_server_pg_hba_file: ../config/postgresql/pg_hba.conf
 ```
 
 O bloco de variavel _user_ contem as variaveis necessarias para criação dos usuários:
@@ -50,7 +51,7 @@ Playbook de exemplo
           
   roles:
     - role: postgresql_server
-      postgresql_server_pg_hba_file: ../templates/postgresql/pg_hba.conf
+      postgresql_server_pg_hba_file: ../config/postgresql/pg_hba.conf
       users:
         - username: alice
           password: aliceLongPassword
@@ -61,6 +62,12 @@ Playbook de exemplo
           database: neo
 ```
 
+obs: Arquivo modelo pg_hba.conf no diretorio _files_.  
+
+TODO
+----
+- Criar template jinja2 paga arquivo pg_hba.conf.
+
 Licença
 -------
 
@@ -70,4 +77,4 @@ Informações do Autor
 --------------------
 
 Fabricio Boreli Ferreira  
-fabricioboreli@openmailbox.org
+fabricioboreli at openmailbox dot org

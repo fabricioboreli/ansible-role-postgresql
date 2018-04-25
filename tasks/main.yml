@@ -1,89 +1,11 @@
 ---
-- name: Copia o arquivo que contem o repositorio do postgresql 9.6
-  copy:
-    src: pgdg-centos96-9.6-3.noarch.rpm
-    dest: /tmp/
+# Install and configure PostgreSQL on CentOS 7
+- import_tasks: centos.yml
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == "7"
 
-- name: Instala o pacote que contem o repositorio do postgresql 9.6
-  yum:
-    name: /tmp/pgdg-centos96-9.6-3.noarch.rpm
-    state: present
+# Install and configure PostgreSQL on Debian 9
+- import_tasks: debian.yml
+  when: ansible_distribution == 'Debian' and ansible_distribution_major_version == "9"
 
-- name: Instala os pacotes do postgresql 9.6 e dependencias
-  yum:
-    update_cache: yes
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - postgresql96
-    - postgresql96-contrib
-    - postgresql96-docs
-    - postgresql96-plperl
-    - postgresql96-plpython
-    - postgresql96-server
-    - postgresql96-libs
-    - python-psycopg2
-    - libpqxx-devel
-
-- name: Inicia o banco de dados do postgresql 9.6
-  command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
-  args:
-    creates: /var/lib/pgsql/9.6/data/postgresql.conf
-
-- name: Remove parametro listen_addresses no postgresql.conf
-  lineinfile:
-    dest: "/var/lib/pgsql/9.6/data/postgresql.conf"
-    regexp: '^#listen_addresses ='
-    state: absent
-
-- name: Adiciona parametro listen_addresses no postgresql.conf
-  lineinfile:
-    dest: "/var/lib/pgsql/9.6/data/postgresql.conf"
-    line: "listen_addresses = '*'"
-    insertafter: "# - Connection Settings -"
-    
-- name: Copia o arquivo pg_hba.conf com permissoes de acesso
-  template:
-    src: "{{postgresql_server_pg_hba_file }}"
-    dest: "/var/lib/pgsql/9.6/data/pg_hba.conf"
-    owner: postgres
-    group: postgres
-    mode: 0600
-  notify: Reinicia o postgresql 9.6
-
-- name: Inicia o postgresql 9.6
-  service:
-    name: postgresql-9.6
-    enabled: yes
-    state: started
-
-- name: Cadastra usuarios no postgresql
-  postgresql_user:
-    name: "{{ item.username }}"
-    password: "{{ item.password }}"
-    state: present
-  become: yes
-  become_user: postgres
-  with_items: "{{ users }}"
-  
-- name: Cadastra bancos de dados no postgresql
-  postgresql_db:
-    name: "{{ item.username }}"
-    owner: "{{ item.username }}"
-    state: present
-  become: yes
-  become_user: postgres
-  with_items: "{{ users }}"
-  
-- name: Define privilegios para usuarios no postgresql
-  postgresql_privs:
-    database: "{{ item.database }}"
-    password: "{{ item.password }}"
-    role: "{{ item.username }}"
-    privs: ALL
-    type: database
-    grant_option: yes
-    state: present
-  become: yes
-  become_user: postgres
-  with_items: "{{ users }}"
+# Add users and databases, define privileges
+- import_tasks: manage_users_databases.yml

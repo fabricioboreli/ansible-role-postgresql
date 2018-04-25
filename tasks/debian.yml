@@ -1,0 +1,56 @@
+---
+- name: PostgreSQL | Add repository key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    id: 7FCC7D46ACCC4CF8
+    state: present
+    
+- name: PostgreSQL | Add repository
+  apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
+    filename: postgresql
+    update_cache: yes
+    state: present
+
+- name: PostgreSQL | Install packages and dependencies
+  apt:
+    update_cache: yes
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - postgresql-9.6
+    - postgresql-contrib-9.6
+    - postgresql-doc-9.6
+    - postgresql-plperl-9.6
+    - postgresql-plpython-9.6
+    - python-psycopg2
+    - libpqxx-dev
+    - libpq-dev
+    - acl
+
+- name: PostgreSQL | Remove listen_addresses line from the configuration file if commented out
+  lineinfile:
+    dest: "/etc/postgresql/9.6/main/postgresql.conf"
+    regexp: '^#listen_addresses ='
+    state: absent
+
+- name: PostgreSQL | Server daemon will listen in all IP addresses
+  lineinfile:
+    dest: "/etc/postgresql/9.6/main/postgresql.conf"
+    line: "listen_addresses = '*'"
+    insertafter: "# - Connection Settings -"
+    
+- name: PostgreSQL | Copy pg_hba.conf file and set permissions
+  template:
+    src: "{{postgresql_server_pg_hba_file }}"
+    dest: "/etc/postgresql/9.6/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: 0640
+  notify: PostgreSQL | Restart (debian)
+
+- name: PostgreSQL | Enable and start server daemon
+  service:
+    name: postgresql
+    enabled: yes
+    state: started
